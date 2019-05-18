@@ -8,9 +8,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>错误页面</title>
 </head>
 <body>
-错误
+出错了！
 </body>
 </html>
