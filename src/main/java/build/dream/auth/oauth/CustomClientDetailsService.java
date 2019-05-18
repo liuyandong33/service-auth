@@ -58,6 +58,12 @@ public class CustomClientDetailsService implements ClientDetailsService {
             additionalInformationMap = JacksonUtils.readValueAsMap(additionalInformation, String.class, Object.class);
         }
 
+        List<String> autoApproveScopes = new ArrayList<String>();
+        String autoApproveScope = oauthClientDetail.getAutoApproveScope();
+        if (StringUtils.isNotBlank(autoApproveScope)) {
+            autoApproveScopes = Arrays.asList(autoApproveScope.split(","));
+        }
+
         BaseClientDetails baseClientDetails = new BaseClientDetails();
         baseClientDetails.setClientId(clientId);
         baseClientDetails.setClientSecret(oauthClientDetail.getClientSecret());
@@ -69,7 +75,7 @@ public class CustomClientDetailsService implements ClientDetailsService {
         baseClientDetails.setAccessTokenValiditySeconds(oauthClientDetail.getAccessTokenValidity());
         baseClientDetails.setRefreshTokenValiditySeconds(oauthClientDetail.getRefreshTokenValidity());
         baseClientDetails.setAdditionalInformation(additionalInformationMap);
-        baseClientDetails.setAutoApproveScopes(new ArrayList<String>());
+        baseClientDetails.setAutoApproveScopes(autoApproveScopes);
         return baseClientDetails;
     }
 }
