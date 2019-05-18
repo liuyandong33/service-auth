@@ -19,6 +19,11 @@ public class AuthController {
         HttpServletRequest httpServletRequest = ApplicationHandler.getHttpServletRequest();
         HttpServletResponse httpServletResponse = ApplicationHandler.getHttpServletResponse();
         SavedRequest savedRequest = httpSessionRequestCache.getRequest(httpServletRequest, httpServletResponse);
-        return "auth/index";
+        if (savedRequest != null) {
+            httpSessionRequestCache.removeRequest(httpServletRequest, httpServletResponse);
+            return "auth/index";
+        } else {
+            return "auth/error";
+        }
     }
 }
