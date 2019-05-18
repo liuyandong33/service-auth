@@ -1,0 +1,105 @@
+group "build.dream"
+version "1.0.0"
+
+buildscript {
+    ext {
+        springBootVersion = "2.0.0.RELEASE"
+        springCloudVersion = "Finchley.RELEASE"
+        projectName = "service-auth"
+    }
+    repositories {
+        mavenLocal()
+        maven { url "${mavenPublicRepositoryUrl}" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: "java"
+apply plugin: "org.springframework.boot"
+apply plugin: "io.spring.dependency-management"
+apply plugin: "idea"
+apply plugin: "war"
+apply plugin: "maven-publish"
+
+repositories {
+    mavenLocal()
+    maven { url "${mavenPublicRepositoryUrl}" }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+}
+
+dependencies {
+    compile("build.dream:lib-common:0.1.0-SNAPSHOT")
+    compile("org.scala-lang:scala-library:2.12.5")
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework.boot:spring-boot-starter-security")
+    compile("org.springframework.security.oauth:spring-security-oauth2:2.3.2.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-data-redis")
+    compile("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
+    compile("org.springframework.cloud:spring-cloud-starter-zookeeper-config")
+    compile("org.springframework.kafka:spring-kafka:2.1.5.RELEASE")
+    compile("org.springframework.boot:spring-boot-devtools")
+    compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.0")
+    compile("com.alibaba:druid:1.1.9")
+    compile("mysql:mysql-connector-java:6.0.6")
+    compile("com.google.code.gson:gson:2.8.0")
+    compile("commons-lang:commons-lang:2.6")
+    compile("commons-codec:commons-codec:1.10")
+    compile("commons-collections:commons-collections:3.2.2")
+    compile("dom4j:dom4j:1.6.1")
+    compile("net.sf.json-lib:json-lib:2.4:jdk15")
+    compile("com.google.zxing:javase:3.3.3")
+    compile("org.apache.tomcat.embed:tomcat-embed-jasper")
+    compile("org.apache.commons:commons-lang3:3.9")
+}
+
+publishing {
+    repositories {
+        if (project.hasProperty("release")) {
+            maven {
+                url "${mavenReleasesRepositoryUrl}"
+                credentials {
+                    username = "${nexusUserName}"
+                    password = "${nexusPassword}"
+                }
+            }
+        } else {
+            maven {
+                url "${mavenSnapshotsRepositoryUrl}"
+                credentials {
+                    username = "${nexusUserName}"
+                    password = "${nexusPassword}"
+                }
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            artifacts = ["build/libs/${projectName}-${version}.jar"]
+
+            groupId project.group
+            if (!project.hasProperty("release")) {
+                version version + "-SNAPSHOT"
+            } else {
+                version version
+            }
+            artifactId = projectName
+        }
+    }
+}
+
+bootJar {
+    launchScript {
+    }
+}
