@@ -1,15 +1,14 @@
 package build.dream.auth.oauth;
 
-import build.dream.auth.exceptions.CustomOAuth2Exception;
 import build.dream.auth.services.OauthClientDetailService;
 import build.dream.common.saas.domains.OauthClientDetail;
 import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.ValidateUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
@@ -32,7 +31,7 @@ public class CustomClientDetailsService implements ClientDetailsService {
         try {
             return obtainClientDetails(clientId);
         } catch (Exception e) {
-            throw new CustomOAuth2Exception(e.getMessage(), e);
+            throw new OAuth2Exception(e.getMessage());
         }
     }
 

@@ -4,18 +4,20 @@ import build.dream.auth.constants.Constants;
 import build.dream.common.utils.CommonRedisUtils;
 import build.dream.common.utils.ObjectUtils;
 import build.dream.common.utils.ValidateUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class RedisAuthorizationCodeServices implements AuthorizationCodeServices {
     @Override
     public String createAuthorizationCode(OAuth2Authentication authentication) {
-        String code = RandomStringUtils.randomAlphanumeric(50);
+        String code = DigestUtils.sha256Hex(UUID.randomUUID().toString().getBytes(Constants.CHARSET_UTF_8));
         CommonRedisUtils.setex(code.getBytes(Constants.CHARSET_UTF_8), 300, ObjectUtils.serialize(authentication));
         return code;
     }
