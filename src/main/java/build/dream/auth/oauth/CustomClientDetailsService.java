@@ -1,6 +1,7 @@
 package build.dream.auth.oauth;
 
 import build.dream.auth.services.OauthClientDetailService;
+import build.dream.common.auth.CustomClientDetails;
 import build.dream.common.saas.domains.OauthClientDetail;
 import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.ValidateUtils;
@@ -12,7 +13,6 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
-import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -39,12 +39,12 @@ public class CustomClientDetailsService implements ClientDetailsService {
         OauthClientDetail oauthClientDetail = oauthClientDetailService.obtainOauthClientDetail(clientId);
         ValidateUtils.notNull(oauthClientDetail, "客户端不存在！");
 
-        List<String> resourceIds = Arrays.asList(oauthClientDetail.getResourceIds().split(","));
-        List<String> scope = Arrays.asList(oauthClientDetail.getScope().split(","));
-        List<String> authorizedGrantTypes = Arrays.asList(oauthClientDetail.getAuthorizedGrantTypes().split(","));
-        Set<String> registeredRedirectUris = new HashSet<String>(Arrays.asList(oauthClientDetail.getWebServerRedirectUri().split(",")));
+        Set<String> resourceIds = new LinkedHashSet<String>(Arrays.asList(oauthClientDetail.getResourceIds().split(",")));
+        Set<String> scope = new LinkedHashSet<String>(Arrays.asList(oauthClientDetail.getScope().split(",")));
+        Set<String> authorizedGrantTypes = new LinkedHashSet<String>(Arrays.asList(oauthClientDetail.getAuthorizedGrantTypes().split(",")));
+        Set<String> registeredRedirectUris = new LinkedHashSet<String>(Arrays.asList(oauthClientDetail.getWebServerRedirectUri().split(",")));
 
-        Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
         if (StringUtils.isNotEmpty(oauthClientDetail.getAuthorities())) {
             String[] authorityCodes = oauthClientDetail.getAuthorities().split(",");
             for (String authorityCode : authorityCodes) {
@@ -58,24 +58,24 @@ public class CustomClientDetailsService implements ClientDetailsService {
             additionalInformationMap = JacksonUtils.readValueAsMap(additionalInformation, String.class, Object.class);
         }
 
-        List<String> autoApproveScopes = new ArrayList<String>();
+        Set<String> autoApproveScopes = new HashSet<String>();
         String autoApproveScope = oauthClientDetail.getAutoApproveScope();
         if (StringUtils.isNotBlank(autoApproveScope)) {
-            autoApproveScopes = Arrays.asList(autoApproveScope.split(","));
+            autoApproveScopes = new HashSet<String>(Arrays.asList(autoApproveScope.split(",")));
         }
 
-        BaseClientDetails baseClientDetails = new BaseClientDetails();
-        baseClientDetails.setClientId(clientId);
-        baseClientDetails.setClientSecret(oauthClientDetail.getClientSecret());
-        baseClientDetails.setResourceIds(resourceIds);
-        baseClientDetails.setScope(scope);
-        baseClientDetails.setAuthorizedGrantTypes(authorizedGrantTypes);
-        baseClientDetails.setRegisteredRedirectUri(registeredRedirectUris);
-        baseClientDetails.setAuthorities(authorities);
-        baseClientDetails.setAccessTokenValiditySeconds(oauthClientDetail.getAccessTokenValidity());
-        baseClientDetails.setRefreshTokenValiditySeconds(oauthClientDetail.getRefreshTokenValidity());
-        baseClientDetails.setAdditionalInformation(additionalInformationMap);
-        baseClientDetails.setAutoApproveScopes(autoApproveScopes);
-        return baseClientDetails;
+        CustomClientDetails customClientDetails = new CustomClientDetails();
+        customClientDetails.setClientId(clientId);
+        customClientDetails.setClientSecret(oauthClientDetail.getClientSecret());
+        customClientDetails.setResourceIds(resourceIds);
+        customClientDetails.setScope(scope);
+        customClientDetails.setAuthorizedGrantTypes(authorizedGrantTypes);
+        customClientDetails.setRegisteredRedirectUris(registeredRedirectUris);
+        customClientDetails.setAuthorities(authorities);
+        customClientDetails.setAccessTokenValiditySeconds(oauthClientDetail.getAccessTokenValidity());
+        customClientDetails.setRefreshTokenValiditySeconds(oauthClientDetail.getRefreshTokenValidity());
+        customClientDetails.setAdditionalInformation(additionalInformationMap);
+        customClientDetails.setAutoApproveScopes(autoApproveScopes);
+        return customClientDetails;
     }
 }

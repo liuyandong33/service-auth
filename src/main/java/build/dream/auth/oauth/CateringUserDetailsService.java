@@ -1,5 +1,6 @@
 package build.dream.auth.oauth;
 
+import build.dream.common.auth.TenantUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,15 +19,12 @@ public class CateringUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Collection<? extends GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-        CateringUserDetails cateringUserDetails = new CateringUserDetails();
-        cateringUserDetails.setUsername(username);
-        cateringUserDetails.setPassword(passwordEncoder.encode("123456"));
-        cateringUserDetails.setAuthorities(authorities);
-        cateringUserDetails.setAccountNonExpired(true);
-        cateringUserDetails.setAccountNonLocked(true);
-        cateringUserDetails.setCredentialsNonExpired(true);
-        cateringUserDetails.setEnabled(true);
-        return cateringUserDetails;
+        Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+
+        TenantUserDetails tenantUserDetails = new TenantUserDetails();
+        tenantUserDetails.setUsername(username);
+        tenantUserDetails.setPassword(passwordEncoder.encode("123456"));
+        tenantUserDetails.setAuthorities(authorities);
+        return tenantUserDetails;
     }
 }
