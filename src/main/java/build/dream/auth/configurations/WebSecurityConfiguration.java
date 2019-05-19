@@ -36,7 +36,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .logout().logoutUrl("/auth/logout").invalidateHttpSession(true)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/index", "/auth/login", "/favicon.ico").permitAll()
+                .antMatchers("/auth/index", "/auth/login", "/oauth/logout", "/favicon.ico").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
