@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -50,9 +51,11 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
-        endpoints.tokenStore(tokenStore()).authenticationManager(authenticationManager);
+        endpoints.tokenStore(tokenStore());
+        endpoints.authenticationManager(authenticationManager);
         endpoints.pathMapping("/oauth/confirm_access", "/oauth/confirmAccess");
         endpoints.authorizationCodeServices(redisAuthorizationCodeServices);
+        endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
     }
 
     @Bean

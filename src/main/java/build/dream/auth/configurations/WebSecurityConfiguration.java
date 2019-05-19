@@ -3,6 +3,7 @@ package build.dream.auth.configurations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 @Configuration
+@Order(1)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailService;
@@ -34,7 +36,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .logout().logoutUrl("/auth/logout").invalidateHttpSession(true)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/index", "/auth/login").permitAll()
+                .antMatchers("/auth/index", "/auth/login", "/favicon.ico").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
