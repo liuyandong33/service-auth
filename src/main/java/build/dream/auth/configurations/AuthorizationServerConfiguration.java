@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -36,6 +37,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     private AccessDeniedHandler accessDeniedHandler;
     @Autowired
     private RedisConnectionFactory redisConnectionFactory;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) {
@@ -56,6 +59,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         endpoints.pathMapping("/oauth/confirm_access", "/oauth/confirmAccess");
         endpoints.authorizationCodeServices(redisAuthorizationCodeServices);
         endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
+        endpoints.userDetailsService(userDetailsService);
     }
 
     @Bean

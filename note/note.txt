@@ -4,6 +4,7 @@ http://localhost:8887/oauth/token?grant_type=client_credentials&client_id=610118
 授权码模式（authorization code）
 http://localhost:8887/oauth/authorize?response_type=code&client_id=61011888&redirect_uri=https://www.baidu.com&scope=all
 http://localhost:8887/oauth/token?grant_type=authorization_code&code=ce82b52256a0edf4551c8fbd7387d8e2008b4daee40df404554e768b474889bb&client_id=61011888&client_secret=123456&redirect_uri=https://www.baidu.com
+http://localhost/oauth/token?grant_type=refresh_token&refresh_token=811fcabf-a70f-4241-b02c-050395106be3&client_id=61011888&client_secret=123456
 
 密码模式（resource owner password credentials）
 http://localhost:8887/oauth/token?grant_type=password&username=admin&password=123456&client_id=61011888&client_secret=123456&scope=all
