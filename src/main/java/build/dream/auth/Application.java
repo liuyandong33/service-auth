@@ -1,5 +1,6 @@
 package build.dream.auth;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -11,6 +12,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @ServletComponentScan
 @EnableDiscoveryClient
 @EnableRedisHttpSession
+@MapperScan(basePackages = {"build.dream.common.mappers", "build.dream.auth.mappers"})
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
