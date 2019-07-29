@@ -11,10 +11,7 @@ import build.dream.common.saas.domains.PosPrivilege;
 import build.dream.common.saas.domains.SystemUser;
 import build.dream.common.saas.domains.Tenant;
 import build.dream.common.saas.domains.TenantSecretKey;
-import build.dream.common.utils.CommonUtils;
-import build.dream.common.utils.JacksonUtils;
-import build.dream.common.utils.ProxyUtils;
-import build.dream.common.utils.ValidateUtils;
+import build.dream.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -34,6 +32,10 @@ public class CateringUserDetailsService implements UserDetailsService {
     private TenantService tenantService;
     @Autowired
     private PrivilegeService privilegeService;
+
+    private static final String PUBLIC_KEY = "Public-Key";
+    private static final String PRIVATE_KEY = "Private-Key";
+    private static final String PLATFORM_PUBLIC_KEY = "Platform-Public-Key";
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -83,6 +85,11 @@ public class CateringUserDetailsService implements UserDetailsService {
         tenantUserDetails.setPartitionCode(partitionCode);
         tenantUserDetails.setPublicKey(tenantSecretKey.getPublicKey());
         tenantUserDetails.setPrivateKey(tenantSecretKey.getPrivateKey());
+
+        HttpServletResponse httpServletResponse = ApplicationHandler.getHttpServletResponse();
+        httpServletResponse.addHeader(PUBLIC_KEY, tenantSecretKey.getPublicKey());
+        httpServletResponse.addHeader(PRIVATE_KEY, tenantSecretKey.getPrivateKey());
+        httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, tenantSecretKey.getPlatformPublicKey());
         return tenantUserDetails;
     }
 }
