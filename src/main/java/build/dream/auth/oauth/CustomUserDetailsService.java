@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 @Component
-public class CateringUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private SystemUserService systemUserService;
     @Autowired
