@@ -1,7 +1,7 @@
 package build.dream.auth.services;
 
 import build.dream.auth.mappers.PrivilegeMapper;
-import build.dream.common.saas.domains.PosPrivilege;
+import build.dream.common.domains.saas.PosPrivilege;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,7 +1,7 @@
 package build.dream.auth.services;
 
 import build.dream.auth.constants.Constants;
-import build.dream.common.saas.domains.OauthClientDetail;
+import build.dream.common.domains.saas.OauthClientDetail;
 import build.dream.common.utils.DatabaseHelper;
 import build.dream.common.utils.SearchModel;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="build.dream.auth.mappers.SystemUserMapper">
-    <select id="findByLoginNameOrEmailOrMobile" resultType="build.dream.common.saas.domains.SystemUser">
+    <select id="findByLoginNameOrEmailOrMobile" resultType="build.dream.common.domains.saas.SystemUser">
         SELECT * FROM system_user WHERE (login_name = #{loginName} OR email = #{loginName} OR mobile = #{loginName}) AND deleted = 0
     </select>
 </mapper>

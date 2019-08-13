@@ -9,7 +9,7 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.auth.AgentUserDetails;
 import build.dream.common.auth.CateringUserDetails;
 import build.dream.common.auth.IotUserDetails;
-import build.dream.common.saas.domains.*;
+import build.dream.common.domains.saas.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;

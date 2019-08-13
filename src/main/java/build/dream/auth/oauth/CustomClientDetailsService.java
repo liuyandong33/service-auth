@@ -2,7 +2,7 @@ package build.dream.auth.oauth;
 
 import build.dream.auth.services.OauthClientDetailService;
 import build.dream.common.auth.CustomClientDetails;
-import build.dream.common.saas.domains.OauthClientDetail;
+import build.dream.common.domains.saas.OauthClientDetail;
 import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.lang3.StringUtils;
