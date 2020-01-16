@@ -38,7 +38,7 @@ public class SSOController {
         if (index > URLS.size()) {
             return "redirect:" + URLS.get(index) + "?token=" + token + "&redirectUrl=https://www.groovy.top/auth/sso/login" + "&originalRedirectUrl=" + redirectUrl;
         } else {
-            return "redirect:" + httpServletRequest.getParameter("originalRedirectUrl");
+            return "redirect:" + httpServletRequest.getParameter("redirectUrl");
         }
     }
 }
