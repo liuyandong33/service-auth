@@ -5,7 +5,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +37,21 @@ public class SSOController {
 
         int index = Integer.parseInt(indexStr);
         index += 1;
-        if (index > URLS.size()) {
-            return "redirect:" + URLS.get(index) + "?token=" + token + "&redirectUrl=https://www.groovy.top/auth/sso/login" + "&originalRedirectUrl=" + redirectUrl;
+        if (index <= URLS.size()) {
+            return "redirect:" + URLS.get(index) + "?token=" + token + "&index=" + index + "&redirectUrl=https://www.groovy.top/auth/sso/login" + "&originalRedirectUrl=" + redirectUrl;
         } else {
-            return "redirect:" + httpServletRequest.getParameter("redirectUrl");
+            return "redirect:" + redirectUrl;
         }
+    }
+
+    @RequestMapping(value = "/login")
+    public String login(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String token = httpServletRequest.getParameter("token");
+        String redirectUrl = httpServletRequest.getParameter("redirectUrl");
+        String originalRedirectUrl = httpServletRequest.getParameter("originalRedirectUrl");
+        String index = httpServletRequest.getParameter("index");
+
+        httpServletResponse.addCookie(new Cookie("ACCESS_TOKEN", token));
+        return "redirect:" + redirectUrl + "?token=" + token + "&index=" + index + "&redirectUrl=" + originalRedirectUrl;
     }
 }
