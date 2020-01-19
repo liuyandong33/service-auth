@@ -1,18 +1,17 @@
 package build.dream.auth.controllers;
 
-import build.dream.auth.constants.Constants;
 import build.dream.common.utils.ApplicationHandler;
-import build.dream.common.utils.CommonUtils;
 import build.dream.common.utils.UrlUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/sso")
@@ -49,5 +48,11 @@ public class SSOController {
         } else {
             return "redirect:" + redirectUrl;
         }
+    }
+
+    @RequestMapping(value = "/ssoJavaScript", produces = "application/javascript; charset=utf-8")
+    @ResponseBody
+    public String ssoJavaScript() {
+        return "function sso(accessToken) {var urls = [" + URLS.stream().map(s -> "'" + s + "'").collect(Collectors.joining()) + "];for (var index in urls) {var url = urls[index];$.get(url, {accessToken: accessToken}, function (result) {console.log(result)}, \"json\");}}";
     }
 }
