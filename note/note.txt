@@ -8,3 +8,5 @@ http://localhost/oauth/token?grant_type=refresh_token&refresh_token=811fcabf-a70
 
 密码模式（resource owner password credentials）
 http://localhost:8887/oauth/token?grant_type=password&username=admin&password=123456&client_id=61011888&client_secret=123456&scope=all
+
+http://localhost:8888/oauth/token?grant_type=password&username=61011888&password=123456&client_id=a6f844132d4fea77bad472a94e58e5d1&client_secret=95a8d9aec29222861e888e7cdd27a082&scope=all

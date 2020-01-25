@@ -1,21 +1,29 @@
 package build.dream.auth.controllers;
 
 import build.dream.common.utils.ApplicationHandler;
+import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.UrlUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/sso")
 public class SSOController {
+    @Autowired
+    private TokenStore tokenStore;
     private static final List<String> REDIRECT_SSO_LOGIN_URLS = new ArrayList<String>();
     private static final List<String> AJAX_SSO_LOGIN_URLS = new ArrayList<String>();
     private static final String SSO_LOGIN_URL = "http://localhost:8888/sso/login";
@@ -66,5 +74,29 @@ public class SSOController {
     @ResponseBody
     public String ssoJavaScript() {
         return "function sso(accessToken) {var urls = [" + AJAX_SSO_LOGIN_URLS.stream().map(s -> "'" + s + "'").collect(Collectors.joining(", ")) + "];for (var index in urls) {var url = urls[index];$.get(url, {accessToken: accessToken}, function (result) {console.log(result)}, \"text\");}}";
+    }
+
+    /**
+     * 单点登录获取token
+     *
+     * @param httpServletRequest
+     * @param httpServletResponse
+     * @return
+     */
+    @RequestMapping(value = "/obtainToken", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String test(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        List<Cookie> cookies = Arrays.stream(httpServletRequest.getCookies()).filter(cookie -> "ACCESS_TOKEN".equals(cookie.getName())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(cookies)) {
+            String accessToken = UrlUtils.decode(cookies.get(0).getValue());
+            OAuth2AccessToken oAuth2AccessToken = tokenStore.readAccessToken(accessToken);
+            if (Objects.nonNull(oAuth2AccessToken)) {
+                return JacksonUtils.writeValueAsString(oAuth2AccessToken);
+            }
+        }
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("error", "token_not_exists");
+        result.put("error_description", "token不存在或已过期，请重新登录！");
+        return JacksonUtils.writeValueAsString(result);
     }
 }
