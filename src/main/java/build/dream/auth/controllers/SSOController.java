@@ -4,6 +4,7 @@ import build.dream.common.utils.ApplicationHandler;
 import build.dream.common.utils.JacksonUtils;
 import build.dream.common.utils.UrlUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -86,9 +87,18 @@ public class SSOController {
     @RequestMapping(value = "/obtainToken", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String test(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        List<Cookie> cookies = Arrays.stream(httpServletRequest.getCookies()).filter(cookie -> "ACCESS_TOKEN".equals(cookie.getName())).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(cookies)) {
-            String accessToken = UrlUtils.decode(cookies.get(0).getValue());
+        Cookie accessTokenCookie = null;
+        Cookie[] cookies = httpServletRequest.getCookies();
+        if (ArrayUtils.isNotEmpty(cookies)) {
+            for (Cookie cookie : cookies) {
+                if ("ACCESS_TOKEN".equals(cookie.getName())) {
+                    accessTokenCookie = cookie;
+                    break;
+                }
+            }
+        }
+        if (Objects.nonNull(accessTokenCookie)) {
+            String accessToken = accessTokenCookie.getValue();
             OAuth2AccessToken oAuth2AccessToken = tokenStore.readAccessToken(accessToken);
             if (Objects.nonNull(oAuth2AccessToken)) {
                 return JacksonUtils.writeValueAsString(oAuth2AccessToken);
