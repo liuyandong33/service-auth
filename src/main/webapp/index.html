@@ -9,8 +9,38 @@
     <script type="text/javascript" src="http://localhost:8888/sso/ssoJavaScript"></script>
     <script type="text/javascript">
         $(function () {
-            sso("AAAAAA");
-        })
+            // sso("AAAAAA");
+            oauthToken("a6f844132d4fea77bad472a94e58e5d1", "95a8d9aec29222861e888e7cdd27a082", "61011888", "123456");
+        });
+
+        $.get("http://localhost:8888/sso/obtainToken", {}, function (result) {
+            if (result["error"]) {
+
+            } else {
+                localStorage.setItem("TOKEN", result);
+            }
+        }, "json");
+        
+        function oauthToken(clientId, clientSecret, username, password) {
+            $.get("http://localhost:8989/auth/oauth/token", {client_id: clientId, client_secret: clientSecret, username: username, password: password}, function (result) {
+                if (result["error"]) {
+                    alert(result["error_description"]);
+                } else {
+                    alert(JSON.stringify(result));
+                }
+            }, "json");
+        }
+
+        function obtainAccessToken() {
+            var token = localStorage.getItem("TOKEN");
+            if (token) {
+                var expiresIn = token["expires_in"];
+                var obtainTokenTime = localStorage.getItem("OBTAIN_TOKEN_TIME");
+                if (new Date().getTime() - obtainTokenTime < obtainTokenTime * 1000) {
+                    return token["access_token"];
+                }
+            }
+        }
     </script>
 </head>
 <body>

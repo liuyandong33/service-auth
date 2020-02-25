@@ -9,9 +9,12 @@ import build.dream.common.api.ApiRest;
 import build.dream.common.auth.AgentUserDetails;
 import build.dream.common.auth.CateringUserDetails;
 import build.dream.common.auth.IotUserDetails;
+import build.dream.common.auth.VipUserDetails;
+import build.dream.common.domains.catering.Vip;
 import build.dream.common.domains.saas.*;
 import build.dream.common.utils.*;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
@@ -38,9 +42,67 @@ public class CustomUserDetailsService implements UserDetailsService {
     private static final String PUBLIC_KEY = "Public-Key";
     private static final String PRIVATE_KEY = "Private-Key";
     private static final String PLATFORM_PUBLIC_KEY = "Platform-Public-Key";
+    private static final String CLIENT_ID = "client_id";
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        String clientId = ApplicationHandler.getRequestParameter(CLIENT_ID);
+        if (Constants.O2O.equals(clientId)) {
+            return buildVipUserDetails(username);
+        }
+        return buildUserDetails(username, clientId);
+    }
+
+    private UserDetails buildVipUserDetails(String username) {
+        String tenantId = ApplicationHandler.getRequestParameter("tenantId");
+        ValidateUtils.notBlank(tenantId, "商户ID不能为空！");
+
+        String mainOpenId = ApplicationHandler.getRequestParameter("mainOpenId");
+        String alipayUserId = ApplicationHandler.getRequestParameter("alipayUserId");
+        String phoneNumber = ApplicationHandler.getRequestParameter("phoneNumber");
+
+        ValidateUtils.isTrue(StringUtils.isNotBlank(mainOpenId) || StringUtils.isNotBlank(alipayUserId) || StringUtils.isNotBlank(phoneNumber), "mainOpenId、alipayUserId、phoneNumber不能同时为空！");
+
+        Tenant tenant = TenantUtils.obtainTenantInfo(BigInteger.valueOf(Long.valueOf(tenantId)));
+
+        Map<String, String> obtainVipInfoRequestParameters = new HashMap<String, String>();
+        obtainVipInfoRequestParameters.put("tenantId", tenantId);
+        if (StringUtils.isNotBlank(mainOpenId)) {
+            obtainVipInfoRequestParameters.put("mainOpenId", mainOpenId);
+        }
+        if (StringUtils.isNotBlank(alipayUserId)) {
+            obtainVipInfoRequestParameters.put("alipayUserId", alipayUserId);
+        }
+        if (StringUtils.isNotBlank(phoneNumber)) {
+            obtainVipInfoRequestParameters.put("phoneNumber", phoneNumber);
+        }
+        ApiRest obtainVipInfoResult = ProxyUtils.doGetWithRequestParameters(tenant.getPartitionCode(), CommonUtils.getServiceName(tenant.getBusiness()), "o2o", "obtainVipInfo", obtainVipInfoRequestParameters);
+        ValidateUtils.isTrue(obtainVipInfoResult.isSuccessful(), obtainVipInfoResult.getError());
+
+        Vip vip = (Vip) obtainVipInfoResult.getData();
+
+        Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+
+        VipUserDetails vipUserDetails = new VipUserDetails();
+        vipUserDetails.setAuthorities(authorities);
+        vipUserDetails.setUsername(username);
+        vipUserDetails.setPassword(BCryptUtils.encode("123456"));
+        vipUserDetails.setTenantId(tenant.getId());
+        vipUserDetails.setTenantCode(tenant.getCode());
+        vipUserDetails.setVipId(vip.getId());
+        vipUserDetails.setClientType(Constants.CLIENT_TYPE_O2O);
+        return vipUserDetails;
+    }
+
+    private UserDetails buildUserDetails(String username, String clientId) {
+        String clientType = null;
+        if (Constants.APP.equals(clientId)) {
+            clientType = Constants.CLIENT_TYPE_APP;
+        } else if (Constants.POS.equals(clientId)) {
+            clientType = Constants.CLIENT_TYPE_POS;
+        } else if (Constants.WEB.equals(clientId)) {
+            clientType = Constants.CLIENT_TYPE_WEB;
+        }
         SystemUser systemUser = systemUserService.findByLoginNameOrEmailOrMobile(username);
         ValidateUtils.notNull(systemUser, "用户不存在！");
 
@@ -51,16 +113,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         int userType = systemUser.getUserType();
         if (userType == Constants.USER_TYPE_AGENT) {
-            return buildAgentUserDetails(username, systemUser);
+            return buildAgentUserDetails(username, systemUser, clientType);
         }
 
         if (userType == Constants.USER_TYPE_TENANT || userType == Constants.USER_TYPE_TENANT_EMPLOYEE) {
-            return buildTenantUserDetails(username, systemUser);
+            return buildTenantUserDetails(username, systemUser, clientType);
         }
         return null;
     }
 
-    private UserDetails buildAgentUserDetails(String username, SystemUser systemUser) {
+    private UserDetails buildAgentUserDetails(String username, SystemUser systemUser, String clientType) {
         BigInteger agentId = systemUser.getAgentId();
         Agent agent = agentService.obtainAgent(agentId);
         ValidateUtils.notNull(agent, "代理商不存在！");
@@ -78,27 +140,28 @@ public class CustomUserDetailsService implements UserDetailsService {
         agentUserDetails.setUserId(systemUser.getId());
         agentUserDetails.setAgentId(agentId);
         agentUserDetails.setAgentCode(agent.getCode());
+        agentUserDetails.setClientType(clientType);
         return agentUserDetails;
     }
 
-    private UserDetails buildTenantUserDetails(String username, SystemUser systemUser) {
+    private UserDetails buildTenantUserDetails(String username, SystemUser systemUser, String clientType) {
         BigInteger tenantId = systemUser.getTenantId();
         Tenant tenant = tenantService.obtainTenant(tenantId);
         ValidateUtils.notNull(tenant, "商户不存在！");
 
         String business = tenant.getBusiness();
         if (Constants.BUSINESS_CATERING.equals(business)) {
-            return buildCateringUserDetails(username, systemUser, tenant);
+            return buildCateringUserDetails(username, systemUser, tenant, clientType);
         }
 
         if (Constants.BUSINESS_IOT.equals(business)) {
-            return buildIotUserDetails(username, systemUser, tenant);
+            return buildIotUserDetails(username, systemUser, tenant, clientType);
         }
 
         return null;
     }
 
-    private UserDetails buildIotUserDetails(String username, SystemUser systemUser, Tenant tenant) {
+    private UserDetails buildIotUserDetails(String username, SystemUser systemUser, Tenant tenant, String clientType) {
         BigInteger userId = systemUser.getId();
         Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 
@@ -130,6 +193,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         iotUserDetails.setPartitionCode(partitionCode);
         iotUserDetails.setPublicKey(tenantSecretKey.getPublicKey());
         iotUserDetails.setPrivateKey(tenantSecretKey.getPrivateKey());
+        iotUserDetails.setClientType(clientType);
 
         HttpServletResponse httpServletResponse = ApplicationHandler.getHttpServletResponse();
         httpServletResponse.addHeader(PUBLIC_KEY, tenantSecretKey.getPublicKey());
@@ -138,15 +202,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return iotUserDetails;
     }
 
-    private UserDetails buildCateringUserDetails(String username, SystemUser systemUser, Tenant tenant) {
+    private UserDetails buildCateringUserDetails(String username, SystemUser systemUser, Tenant tenant, String clientType) {
         BigInteger userId = systemUser.getId();
-        List<PosPrivilege> posPrivileges = privilegeService.obtainUserPosPrivileges(userId);
-        Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-        for (PosPrivilege posPrivilege : posPrivileges) {
-            SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(posPrivilege.getPrivilegeCode());
-            authorities.add(simpleGrantedAuthority);
-        }
-
+        Collection<GrantedAuthority> authorities = obtainAuthorities(userId, clientType);
         BigInteger tenantId = systemUser.getTenantId();
 
         TenantSecretKey tenantSecretKey = tenantService.obtainTenantSecretKey(tenantId);
@@ -175,11 +233,30 @@ public class CustomUserDetailsService implements UserDetailsService {
         cateringUserDetails.setPartitionCode(partitionCode);
         cateringUserDetails.setPublicKey(tenantSecretKey.getPublicKey());
         cateringUserDetails.setPrivateKey(tenantSecretKey.getPrivateKey());
+        cateringUserDetails.setClientType(clientType);
 
         HttpServletResponse httpServletResponse = ApplicationHandler.getHttpServletResponse();
         httpServletResponse.addHeader(PUBLIC_KEY, tenantSecretKey.getPublicKey());
         httpServletResponse.addHeader(PRIVATE_KEY, tenantSecretKey.getPrivateKey());
         httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, tenantSecretKey.getPlatformPublicKey());
         return cateringUserDetails;
+    }
+
+    private Collection<GrantedAuthority> obtainAuthorities(BigInteger userId, String clientType) {
+        if (Constants.APP.equals(clientType)) {
+            List<AppPrivilege> appPrivileges = privilegeService.obtainUserAppPrivileges(userId);
+            return appPrivileges.stream().map(appPrivilege -> new SimpleGrantedAuthority(appPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
+        }
+
+        if (Constants.POS.equals(clientType)) {
+            List<PosPrivilege> posPrivileges = privilegeService.obtainUserPosPrivileges(userId);
+            return posPrivileges.stream().map(posPrivilege -> new SimpleGrantedAuthority(posPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
+        }
+
+        if (Constants.WEB.equals(clientType)) {
+            List<BackgroundPrivilege> backgroundPrivileges = privilegeService.obtainUserBackgroundPrivileges(userId);
+            return backgroundPrivileges.stream().map(backgroundPrivilege -> new SimpleGrantedAuthority(backgroundPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
+        }
+        return null;
     }
 }
