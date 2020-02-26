@@ -39,9 +39,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private AgentService agentService;
 
-    private static final String PUBLIC_KEY = "Public-Key";
-    private static final String PRIVATE_KEY = "Private-Key";
-    private static final String PLATFORM_PUBLIC_KEY = "Platform-Public-Key";
+    private static final String PUBLIC_KEY = "PUBLIC_KEY";
+    private static final String PRIVATE_KEY = "PRIVATE_KEY";
+    private static final String PLATFORM_PUBLIC_KEY = "PLATFORM_PUBLIC_KEY";
+    private static final String API_URL = "API_URL";
     private static final String CLIENT_ID = "client_id";
 
     @Override
@@ -91,6 +92,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         vipUserDetails.setTenantCode(tenant.getCode());
         vipUserDetails.setVipId(vip.getId());
         vipUserDetails.setClientType(Constants.CLIENT_TYPE_O2O);
+
+        HttpServletResponse httpServletResponse = ApplicationHandler.getHttpServletResponse();
+        httpServletResponse.addHeader(API_URL, CommonUtils.getOutsideServiceDomain(CommonUtils.obtainApiServiceName(Constants.CLIENT_TYPE_O2O)));
         return vipUserDetails;
     }
 
@@ -199,6 +203,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         httpServletResponse.addHeader(PUBLIC_KEY, tenantSecretKey.getPublicKey());
         httpServletResponse.addHeader(PRIVATE_KEY, tenantSecretKey.getPrivateKey());
         httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, tenantSecretKey.getPlatformPublicKey());
+        httpServletResponse.addHeader(API_URL, CommonUtils.getOutsideServiceDomain(CommonUtils.obtainApiServiceName(clientType)));
         return iotUserDetails;
     }
 
@@ -239,6 +244,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         httpServletResponse.addHeader(PUBLIC_KEY, tenantSecretKey.getPublicKey());
         httpServletResponse.addHeader(PRIVATE_KEY, tenantSecretKey.getPrivateKey());
         httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, tenantSecretKey.getPlatformPublicKey());
+        httpServletResponse.addHeader(API_URL, CommonUtils.getOutsideServiceDomain(CommonUtils.obtainApiServiceName(clientType)));
         return cateringUserDetails;
     }
 
