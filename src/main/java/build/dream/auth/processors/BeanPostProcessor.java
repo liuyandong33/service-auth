@@ -1,6 +1,5 @@
 package build.dream.auth.processors;
 
-import build.dream.common.utils.ObjectUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.security.access.ConfigAttribute;
@@ -67,7 +66,7 @@ public class BeanPostProcessor implements org.springframework.beans.factory.conf
                 webSecurityFilterSecurityInterceptor = filterSecurityInterceptor;
             }
 
-            if (ObjectUtils.isNotNull(authorizationServerFilterSecurityInterceptor) && ObjectUtils.isNotNull(resourceServerFilterSecurityInterceptor) && ObjectUtils.isNotNull(webSecurityFilterSecurityInterceptor)) {
+            if (Objects.nonNull(authorizationServerFilterSecurityInterceptor) && Objects.nonNull(resourceServerFilterSecurityInterceptor) && Objects.nonNull(webSecurityFilterSecurityInterceptor)) {
                 int a = 100;
             }
         }
