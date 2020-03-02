@@ -1,12 +1,11 @@
 package build.dream.auth.oauth;
 
-import build.dream.auth.services.OauthClientDetailService;
 import build.dream.common.auth.CustomClientDetails;
 import build.dream.common.domains.saas.OauthClientDetail;
 import build.dream.common.utils.JacksonUtils;
+import build.dream.common.utils.OauthClientDetailUtils;
 import build.dream.common.utils.ValidateUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
@@ -19,9 +18,6 @@ import java.util.*;
 
 @Component
 public class CustomClientDetailsService implements ClientDetailsService {
-    @Autowired
-    private OauthClientDetailService oauthClientDetailService;
-
     @Override
     public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
         return obtainClientDetailsSafe(clientId);
@@ -36,7 +32,7 @@ public class CustomClientDetailsService implements ClientDetailsService {
     }
 
     private ClientDetails obtainClientDetails(String clientId) {
-        OauthClientDetail oauthClientDetail = oauthClientDetailService.obtainOauthClientDetail(clientId);
+        OauthClientDetail oauthClientDetail = OauthClientDetailUtils.obtainOauthClientDetail(clientId);
         ValidateUtils.notNull(oauthClientDetail, "客户端不存在！");
 
         Set<String> resourceIds = new LinkedHashSet<String>(Arrays.asList(oauthClientDetail.getResourceIds().split(",")));
