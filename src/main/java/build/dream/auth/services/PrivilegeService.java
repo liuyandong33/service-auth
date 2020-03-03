@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.List;
 
 @Service
@@ -23,7 +22,7 @@ public class PrivilegeService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<AppPrivilege> obtainUserAppPrivileges(BigInteger userId) {
+    public List<AppPrivilege> obtainUserAppPrivileges(Long userId) {
         return privilegeMapper.obtainUserAppPrivileges(userId);
     }
 
@@ -34,7 +33,7 @@ public class PrivilegeService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<PosPrivilege> obtainUserPosPrivileges(BigInteger userId) {
+    public List<PosPrivilege> obtainUserPosPrivileges(Long userId) {
         return privilegeMapper.obtainUserPosPrivileges(userId);
     }
 
@@ -45,7 +44,7 @@ public class PrivilegeService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<BackgroundPrivilege> obtainUserBackgroundPrivileges(BigInteger userId) {
+    public List<BackgroundPrivilege> obtainUserBackgroundPrivileges(Long userId) {
         return privilegeMapper.obtainUserBackgroundPrivileges(userId);
     }
 }

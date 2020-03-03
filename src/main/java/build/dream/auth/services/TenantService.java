@@ -8,17 +8,15 @@ import build.dream.common.utils.SearchModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
-
 @Service
 public class TenantService {
     @Transactional(readOnly = true)
-    public Tenant obtainTenant(BigInteger tenantId) {
+    public Tenant obtainTenant(Long tenantId) {
         return DatabaseHelper.find(Tenant.class, tenantId);
     }
 
     @Transactional(readOnly = true)
-    public TenantSecretKey obtainTenantSecretKey(BigInteger tenantId) {
+    public TenantSecretKey obtainTenantSecretKey(Long tenantId) {
         SearchModel searchModel = SearchModel.builder()
                 .autoSetDeletedFalse()
                 .addSearchCondition(TenantSecretKey.ColumnName.TENANT_ID, Constants.SQL_OPERATION_SYMBOL_EQUAL, tenantId)

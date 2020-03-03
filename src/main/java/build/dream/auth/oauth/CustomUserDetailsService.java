@@ -24,7 +24,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,7 +63,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         ValidateUtils.isTrue(StringUtils.isNotBlank(mainOpenId) || StringUtils.isNotBlank(alipayUserId) || StringUtils.isNotBlank(phoneNumber), "mainOpenId、alipayUserId、phoneNumber不能同时为空！");
 
-        Tenant tenant = TenantUtils.obtainTenantInfo(BigInteger.valueOf(Long.valueOf(tenantId)));
+        Tenant tenant = TenantUtils.obtainTenantInfo(Long.valueOf(Long.valueOf(tenantId)));
 
         Map<String, String> obtainVipInfoRequestParameters = new HashMap<String, String>();
         obtainVipInfoRequestParameters.put("tenantId", tenantId);
@@ -127,7 +126,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails buildAgentUserDetails(String username, SystemUser systemUser, String clientType) {
-        BigInteger agentId = systemUser.getAgentId();
+        Long agentId = systemUser.getAgentId();
         Agent agent = agentService.obtainAgent(agentId);
         ValidateUtils.notNull(agent, "代理商不存在！");
 
@@ -149,7 +148,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails buildTenantUserDetails(String username, SystemUser systemUser, String clientType) {
-        BigInteger tenantId = systemUser.getTenantId();
+        Long tenantId = systemUser.getTenantId();
         Tenant tenant = tenantService.obtainTenant(tenantId);
         ValidateUtils.notNull(tenant, "商户不存在！");
 
@@ -166,10 +165,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails buildIotUserDetails(String username, SystemUser systemUser, Tenant tenant, String clientType) {
-        BigInteger userId = systemUser.getId();
+        Long userId = systemUser.getId();
         Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 
-        BigInteger tenantId = systemUser.getTenantId();
+        Long tenantId = systemUser.getTenantId();
 
         TenantSecretKey tenantSecretKey = tenantService.obtainTenantSecretKey(tenantId);
         ValidateUtils.notNull(tenantSecretKey, "商户秘钥不存在！");
@@ -182,7 +181,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
 
         Map<String, Object> branchInfo = (Map<String, Object>) apiRest.getData();
-        BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(branchInfo, "id"));
+        Long branchId = Long.valueOf(MapUtils.getLongValue(branchInfo, "id"));
         String branchCode = MapUtils.getString(branchInfo, "code");
 
         IotUserDetails iotUserDetails = new IotUserDetails();
@@ -208,9 +207,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails buildCateringUserDetails(String username, SystemUser systemUser, Tenant tenant, String clientType) {
-        BigInteger userId = systemUser.getId();
+        Long userId = systemUser.getId();
         Collection<GrantedAuthority> authorities = obtainAuthorities(userId, clientType);
-        BigInteger tenantId = systemUser.getTenantId();
+        Long tenantId = systemUser.getTenantId();
 
         TenantSecretKey tenantSecretKey = tenantService.obtainTenantSecretKey(tenantId);
         ValidateUtils.notNull(tenantSecretKey, "商户秘钥不存在！");
@@ -223,7 +222,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         ValidateUtils.isTrue(apiRest.isSuccessful(), apiRest.getError());
 
         Map<String, Object> branchInfo = (Map<String, Object>) apiRest.getData();
-        BigInteger branchId = BigInteger.valueOf(MapUtils.getLongValue(branchInfo, "id"));
+        Long branchId = Long.valueOf(MapUtils.getLongValue(branchInfo, "id"));
         String branchCode = MapUtils.getString(branchInfo, "code");
 
         CateringUserDetails cateringUserDetails = new CateringUserDetails();
@@ -248,7 +247,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return cateringUserDetails;
     }
 
-    private Collection<GrantedAuthority> obtainAuthorities(BigInteger userId, String clientType) {
+    private Collection<GrantedAuthority> obtainAuthorities(Long userId, String clientType) {
         if (Constants.APP.equals(clientType)) {
             List<AppPrivilege> appPrivileges = privilegeService.obtainUserAppPrivileges(userId);
             return appPrivileges.stream().map(appPrivilege -> new SimpleGrantedAuthority(appPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
