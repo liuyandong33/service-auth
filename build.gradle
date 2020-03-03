@@ -40,8 +40,8 @@ configurations.all {
 
 dependencies {
     compile("build.dream:lib-common:0.1.0-SNAPSHOT")
-    compile("org.scala-lang:scala-library:2.12.5")
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.springframework.boot:spring-boot-starter-security")
     compile("org.springframework.security.oauth:spring-security-oauth2:2.3.2.RELEASE")
     compile("org.springframework.cloud:spring-cloud-starter-hystrix:1.4.7.RELEASE")
