@@ -1,7 +1,6 @@
 package build.dream.auth.oauth;
 
 import build.dream.auth.constants.Constants;
-import build.dream.auth.services.AgentService;
 import build.dream.auth.services.PrivilegeService;
 import build.dream.auth.services.SystemUserService;
 import build.dream.auth.services.TenantService;
@@ -35,8 +34,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     private TenantService tenantService;
     @Autowired
     private PrivilegeService privilegeService;
-    @Autowired
-    private AgentService agentService;
 
     private static final String PUBLIC_KEY = "PUBLIC_KEY";
     private static final String PRIVATE_KEY = "PRIVATE_KEY";
@@ -127,7 +124,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private UserDetails buildAgentUserDetails(String username, SystemUser systemUser, String clientType) {
         Long agentId = systemUser.getAgentId();
-        Agent agent = agentService.obtainAgent(agentId);
+        Agent agent = AgentUtils.obtainAgentInfo(agentId);
         ValidateUtils.notNull(agent, "代理商不存在！");
 
         Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
@@ -149,7 +146,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private UserDetails buildTenantUserDetails(String username, SystemUser systemUser, String clientType) {
         Long tenantId = systemUser.getTenantId();
-        Tenant tenant = tenantService.obtainTenant(tenantId);
+        Tenant tenant = TenantUtils.obtainTenantInfo(tenantId);
         ValidateUtils.notNull(tenant, "商户不存在！");
 
         String business = tenant.getBusiness();
