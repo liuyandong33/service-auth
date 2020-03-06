@@ -3,7 +3,6 @@ package build.dream.auth.oauth;
 import build.dream.auth.constants.Constants;
 import build.dream.auth.services.PrivilegeService;
 import build.dream.auth.services.SystemUserService;
-import build.dream.auth.services.TenantService;
 import build.dream.common.api.ApiRest;
 import build.dream.common.auth.AgentUserDetails;
 import build.dream.common.auth.CateringUserDetails;
@@ -30,8 +29,6 @@ import java.util.stream.Collectors;
 public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private SystemUserService systemUserService;
-    @Autowired
-    private TenantService tenantService;
     @Autowired
     private PrivilegeService privilegeService;
 
