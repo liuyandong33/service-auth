@@ -167,8 +167,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Long tenantId = systemUser.getTenantId();
 
-        TenantSecretKey tenantSecretKey = tenantService.obtainTenantSecretKey(tenantId);
-        ValidateUtils.notNull(tenantSecretKey, "商户秘钥不存在！");
+        RsaKeyPair rsaKeyPair = RsaKeyPairUtils.obtainRsaKeyPair(tenantId);
+        ValidateUtils.notNull(rsaKeyPair, "商户秘钥不存在！");
 
         String partitionCode = tenant.getPartitionCode();
         Map<String, Object> obtainBranchInfoParams = new HashMap<String, Object>();
@@ -191,14 +191,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         iotUserDetails.setBranchId(branchId);
         iotUserDetails.setBranchCode(branchCode);
         iotUserDetails.setPartitionCode(partitionCode);
-        iotUserDetails.setPublicKey(tenantSecretKey.getPublicKey());
-        iotUserDetails.setPrivateKey(tenantSecretKey.getPrivateKey());
+        iotUserDetails.setPublicKey(rsaKeyPair.getPublicKey());
+        iotUserDetails.setPrivateKey(rsaKeyPair.getPrivateKey());
         iotUserDetails.setClientType(clientType);
 
         HttpServletResponse httpServletResponse = ApplicationHandler.getHttpServletResponse();
-        httpServletResponse.addHeader(PUBLIC_KEY, tenantSecretKey.getPublicKey());
-        httpServletResponse.addHeader(PRIVATE_KEY, tenantSecretKey.getPrivateKey());
-        httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, tenantSecretKey.getPlatformPublicKey());
+        httpServletResponse.addHeader(PUBLIC_KEY, rsaKeyPair.getPublicKey());
+        httpServletResponse.addHeader(PRIVATE_KEY, rsaKeyPair.getPrivateKey());
+        httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, rsaKeyPair.getPlatformPublicKey());
         httpServletResponse.addHeader(API_URL, CommonUtils.getOutsideServiceDomain(CommonUtils.obtainApiServiceName(clientType)));
         return iotUserDetails;
     }
@@ -208,8 +208,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         Collection<GrantedAuthority> authorities = obtainAuthorities(userId, clientType);
         Long tenantId = systemUser.getTenantId();
 
-        TenantSecretKey tenantSecretKey = tenantService.obtainTenantSecretKey(tenantId);
-        ValidateUtils.notNull(tenantSecretKey, "商户秘钥不存在！");
+        RsaKeyPair rsaKeyPair = RsaKeyPairUtils.obtainRsaKeyPair(tenantId);
+        ValidateUtils.notNull(rsaKeyPair, "商户秘钥不存在！");
 
         String partitionCode = tenant.getPartitionCode();
         Map<String, Object> obtainBranchInfoParams = new HashMap<String, Object>();
@@ -232,14 +232,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         cateringUserDetails.setBranchId(branchId);
         cateringUserDetails.setBranchCode(branchCode);
         cateringUserDetails.setPartitionCode(partitionCode);
-        cateringUserDetails.setPublicKey(tenantSecretKey.getPublicKey());
-        cateringUserDetails.setPrivateKey(tenantSecretKey.getPrivateKey());
+        cateringUserDetails.setPublicKey(rsaKeyPair.getPublicKey());
+        cateringUserDetails.setPrivateKey(rsaKeyPair.getPrivateKey());
         cateringUserDetails.setClientType(clientType);
 
         HttpServletResponse httpServletResponse = ApplicationHandler.getHttpServletResponse();
-        httpServletResponse.addHeader(PUBLIC_KEY, tenantSecretKey.getPublicKey());
-        httpServletResponse.addHeader(PRIVATE_KEY, tenantSecretKey.getPrivateKey());
-        httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, tenantSecretKey.getPlatformPublicKey());
+        httpServletResponse.addHeader(PUBLIC_KEY, rsaKeyPair.getPublicKey());
+        httpServletResponse.addHeader(PRIVATE_KEY, rsaKeyPair.getPrivateKey());
+        httpServletResponse.addHeader(PLATFORM_PUBLIC_KEY, rsaKeyPair.getPlatformPublicKey());
         httpServletResponse.addHeader(API_URL, CommonUtils.getOutsideServiceDomain(CommonUtils.obtainApiServiceName(clientType)));
         return cateringUserDetails;
     }
