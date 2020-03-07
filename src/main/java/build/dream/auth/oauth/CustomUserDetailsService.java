@@ -116,6 +116,22 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (userType == Constants.USER_TYPE_TENANT || userType == Constants.USER_TYPE_TENANT_EMPLOYEE) {
             return buildTenantUserDetails(username, systemUser, clientType);
         }
+
+        if (userType == Constants.USER_TYPE_OP) {
+
+        }
+
+        if (userType == Constants.USER_TYPE_DEV_OPS) {
+
+        }
+        return null;
+    }
+
+    private UserDetails buildOpUserDetails(String username, SystemUser systemUser, String clientType) {
+        return null;
+    }
+
+    private UserDetails buildDevOpsUserDetails(String username, SystemUser systemUser, String clientType) {
         return null;
     }
 
