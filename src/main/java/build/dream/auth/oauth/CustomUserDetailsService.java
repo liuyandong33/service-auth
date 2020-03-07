@@ -4,10 +4,7 @@ import build.dream.auth.constants.Constants;
 import build.dream.auth.services.PrivilegeService;
 import build.dream.auth.services.SystemUserService;
 import build.dream.common.api.ApiRest;
-import build.dream.common.auth.AgentUserDetails;
-import build.dream.common.auth.CateringUserDetails;
-import build.dream.common.auth.IotUserDetails;
-import build.dream.common.auth.VipUserDetails;
+import build.dream.common.auth.*;
 import build.dream.common.domains.catering.Vip;
 import build.dream.common.domains.saas.*;
 import build.dream.common.utils.*;
@@ -99,6 +96,10 @@ public class CustomUserDetailsService implements UserDetailsService {
             clientType = Constants.CLIENT_TYPE_POS;
         } else if (Constants.WEB.equals(clientId)) {
             clientType = Constants.CLIENT_TYPE_WEB;
+        } else if (Constants.OP.equals(clientId)) {
+            clientType = Constants.CLIENT_TYPE_OP;
+        } else if (Constants.DEV_OPS.equals(clientId)) {
+            clientType = Constants.CLIENT_TYPE_DEV_OPS;
         }
         SystemUser systemUser = systemUserService.findByLoginNameOrEmailOrMobile(username);
         ValidateUtils.notNull(systemUser, "用户不存在！");
@@ -118,21 +119,43 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         if (userType == Constants.USER_TYPE_OP) {
-
+            return buildOpUserDetails(username, systemUser, clientType);
         }
 
         if (userType == Constants.USER_TYPE_DEV_OPS) {
-
+            return buildDevOpsUserDetails(username, systemUser, clientType);
         }
         return null;
     }
 
     private UserDetails buildOpUserDetails(String username, SystemUser systemUser, String clientType) {
-        return null;
+        Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        OpUserDetails opUserDetails = new OpUserDetails();
+        opUserDetails.setAuthorities(authorities);
+        opUserDetails.setUsername(username);
+        opUserDetails.setPassword(systemUser.getPassword());
+        opUserDetails.setAccountNonExpired(systemUser.isAccountNonExpired());
+        opUserDetails.setAccountNonLocked(systemUser.isAccountNonLocked());
+        opUserDetails.setCredentialsNonExpired(systemUser.isCredentialsNonExpired());
+        opUserDetails.setEnabled(systemUser.isEnabled());
+        opUserDetails.setUserId(systemUser.getId());
+        opUserDetails.setClientType(clientType);
+        return opUserDetails;
     }
 
     private UserDetails buildDevOpsUserDetails(String username, SystemUser systemUser, String clientType) {
-        return null;
+        Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        DevOpsUserDetails devOpsUserDetails = new DevOpsUserDetails();
+        devOpsUserDetails.setAuthorities(authorities);
+        devOpsUserDetails.setUsername(username);
+        devOpsUserDetails.setPassword(systemUser.getPassword());
+        devOpsUserDetails.setAccountNonExpired(systemUser.isAccountNonExpired());
+        devOpsUserDetails.setAccountNonLocked(systemUser.isAccountNonLocked());
+        devOpsUserDetails.setCredentialsNonExpired(systemUser.isCredentialsNonExpired());
+        devOpsUserDetails.setEnabled(systemUser.isEnabled());
+        devOpsUserDetails.setUserId(systemUser.getId());
+        devOpsUserDetails.setClientType(clientType);
+        return devOpsUserDetails;
     }
 
     private UserDetails buildAgentUserDetails(String username, SystemUser systemUser, String clientType) {
