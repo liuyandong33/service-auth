@@ -30,4 +30,24 @@
         INNER JOIN user_tenant_role_r ON tenant_role.id = user_tenant_role_r.role_id AND user_tenant_role_r.user_id = #{userId}
         WHERE background_privilege.deleted = 0
     </select>
+
+    <select id="obtainUserOpPrivileges" resultType="build.dream.common.domains.saas.OpPrivilege">
+        SELECT
+        op_privilege.*
+        FROM op_privilege
+        INNER JOIN op_role_op_privilege_r ON op_privilege.id = op_role_op_privilege_r.privilege_id
+        INNER JOIN op_role ON op_role.id = op_role_op_privilege_r.role_id AND op_role.deleted = 0
+        INNER JOIN user_op_role_r ON op_role.id = user_op_role_r.role_id AND user_op_role_r.user_id = ${userId}
+        WHERE op_privilege.deleted = 0
+    </select>
+
+    <select id="obtainUserDevOpsPrivileges" resultType="build.dream.common.domains.saas.DevOpsPrivilege">
+        SELECT
+        dev_ops_privilege.*
+        FROM dev_ops_privilege
+        INNER JOIN dev_ops_role_dev_ops_privilege_r ON dev_ops_privilege.id = dev_ops_role_dev_ops_privilege_r.privilege_id
+        INNER JOIN dev_ops_role ON dev_ops_role.id = dev_ops_role_dev_ops_privilege_r.role_id AND dev_ops_role.deleted = 0
+        INNER JOIN user_dev_ops_role_r ON dev_ops_role.id = user_dev_ops_role_r.role_id AND user_dev_ops_role_r.user_id = ${userId}
+        WHERE dev_ops_privilege.deleted = 0
+    </select>
 </mapper>

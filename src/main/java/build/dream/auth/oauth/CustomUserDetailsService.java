@@ -295,6 +295,24 @@ public class CustomUserDetailsService implements UserDetailsService {
             List<BackgroundPrivilege> backgroundPrivileges = privilegeService.obtainUserBackgroundPrivileges(userId);
             return backgroundPrivileges.stream().map(backgroundPrivilege -> new SimpleGrantedAuthority(backgroundPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
         }
+
+        if (Constants.O2O.equals(clientType)) {
+            return new HashSet<GrantedAuthority>();
+        }
+
+        if (Constants.AGENT.equals(clientType)) {
+            return new HashSet<GrantedAuthority>();
+        }
+
+        if (Constants.OP.equals(clientType)) {
+            List<OpPrivilege> opPrivileges = privilegeService.obtainUserOpPrivileges(userId);
+            return opPrivileges.stream().map(opPrivilege -> new SimpleGrantedAuthority(opPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
+        }
+
+        if (Constants.DEV_OPS.equals(clientType)) {
+            List<DevOpsPrivilege> devOpsPrivileges = privilegeService.obtainUserDevOpsPrivileges(userId);
+            return devOpsPrivileges.stream().map(devOpsPrivilege -> new SimpleGrantedAuthority(devOpsPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
+        }
         return null;
     }
 }
