@@ -129,7 +129,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails buildOpUserDetails(String username, SystemUser systemUser, String clientType) {
-        Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        Long userId = systemUser.getId();
+        Collection<GrantedAuthority> authorities = obtainAuthorities(userId, clientType);
         OpUserDetails opUserDetails = new OpUserDetails();
         opUserDetails.setAuthorities(authorities);
         opUserDetails.setUsername(username);
@@ -138,13 +139,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         opUserDetails.setAccountNonLocked(systemUser.isAccountNonLocked());
         opUserDetails.setCredentialsNonExpired(systemUser.isCredentialsNonExpired());
         opUserDetails.setEnabled(systemUser.isEnabled());
-        opUserDetails.setUserId(systemUser.getId());
+        opUserDetails.setUserId(userId);
         opUserDetails.setClientType(clientType);
         return opUserDetails;
     }
 
     private UserDetails buildDevOpsUserDetails(String username, SystemUser systemUser, String clientType) {
-        Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        Long userId = systemUser.getId();
+        Collection<GrantedAuthority> authorities = obtainAuthorities(userId, clientType);
         DevOpsUserDetails devOpsUserDetails = new DevOpsUserDetails();
         devOpsUserDetails.setAuthorities(authorities);
         devOpsUserDetails.setUsername(username);
@@ -153,7 +155,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         devOpsUserDetails.setAccountNonLocked(systemUser.isAccountNonLocked());
         devOpsUserDetails.setCredentialsNonExpired(systemUser.isCredentialsNonExpired());
         devOpsUserDetails.setEnabled(systemUser.isEnabled());
-        devOpsUserDetails.setUserId(systemUser.getId());
+        devOpsUserDetails.setUserId(userId);
         devOpsUserDetails.setClientType(clientType);
         return devOpsUserDetails;
     }
@@ -281,22 +283,22 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private Collection<GrantedAuthority> obtainAuthorities(Long userId, String clientType) {
-        if (Constants.APP.equals(clientType)) {
+        if (Constants.CLIENT_TYPE_APP.equals(clientType)) {
             List<AppPrivilege> appPrivileges = privilegeService.obtainUserAppPrivileges(userId);
             return appPrivileges.stream().map(appPrivilege -> new SimpleGrantedAuthority(appPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
         }
 
-        if (Constants.POS.equals(clientType)) {
+        if (Constants.CLIENT_TYPE_POS.equals(clientType)) {
             List<PosPrivilege> posPrivileges = privilegeService.obtainUserPosPrivileges(userId);
             return posPrivileges.stream().map(posPrivilege -> new SimpleGrantedAuthority(posPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
         }
 
-        if (Constants.WEB.equals(clientType)) {
+        if (Constants.CLIENT_TYPE_WEB.equals(clientType)) {
             List<BackgroundPrivilege> backgroundPrivileges = privilegeService.obtainUserBackgroundPrivileges(userId);
             return backgroundPrivileges.stream().map(backgroundPrivilege -> new SimpleGrantedAuthority(backgroundPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
         }
 
-        if (Constants.O2O.equals(clientType)) {
+        if (Constants.CLIENT_TYPE_O2O.equals(clientType)) {
             return new HashSet<GrantedAuthority>();
         }
 
@@ -304,12 +306,12 @@ public class CustomUserDetailsService implements UserDetailsService {
             return new HashSet<GrantedAuthority>();
         }
 
-        if (Constants.OP.equals(clientType)) {
+        if (Constants.CLIENT_TYPE_OP.equals(clientType)) {
             List<OpPrivilege> opPrivileges = privilegeService.obtainUserOpPrivileges(userId);
             return opPrivileges.stream().map(opPrivilege -> new SimpleGrantedAuthority(opPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
         }
 
-        if (Constants.DEV_OPS.equals(clientType)) {
+        if (Constants.CLIENT_TYPE_DEV_OPS.equals(clientType)) {
             List<DevOpsPrivilege> devOpsPrivileges = privilegeService.obtainUserDevOpsPrivileges(userId);
             return devOpsPrivileges.stream().map(devOpsPrivilege -> new SimpleGrantedAuthority(devOpsPrivilege.getPrivilegeCode())).collect(Collectors.toSet());
         }
